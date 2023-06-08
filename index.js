@@ -26,6 +26,9 @@ async function run() {
     await client.connect();
     const usersCollection = client.db("summerCampDB").collection("users");
     const classesCollection = client.db("summerCampDB").collection("classes");
+    const instructorsCollection = client
+      .db("summerCampDB")
+      .collection("instructors");
 
     // users related api
 
@@ -42,9 +45,16 @@ async function run() {
 
     // classes related api
     app.get("/classes", async (req, res) => {
-      const result = await classesCollection.find().toArray()
-      res.send(result)
-    })
+      const result = await classesCollection.find().toArray();
+      result.sort((a, b) => a.num_students - b.num_students); // Sort by number of students in descending order
+      res.send(result);
+    });
+
+    // instructors related api
+    app.get("/instructors", async (req, res) => {
+      const result = await instructorsCollection.find().toArray();
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
