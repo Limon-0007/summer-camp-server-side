@@ -25,6 +25,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const usersCollection = client.db("summerCampDB").collection("users");
+    const classesCollection = client.db("summerCampDB").collection("classes");
 
     // users related api
 
@@ -38,6 +39,12 @@ async function run() {
       const result = await usersCollection.insertOne(users);
       res.send(result);
     });
+
+    // classes related api
+    app.get("/classes", async (req, res) => {
+      const result = await classesCollection.find().toArray()
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
