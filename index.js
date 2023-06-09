@@ -46,13 +46,14 @@ async function run() {
     // classes related api
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find().toArray();
-      result.sort((a, b) => a.num_students - b.num_students); // Sort by number of students in descending order
+      result.sort((a, b) => b.num_students - a.num_students); // Sort by number of students in descending order
       res.send(result);
     });
 
     // instructors related api
     app.get("/instructors", async (req, res) => {
       const result = await instructorsCollection.find().toArray();
+      result.sort((a, b) => b.number_of_students - a.number_of_students);
       res.send(result);
     });
 
