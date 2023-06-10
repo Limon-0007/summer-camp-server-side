@@ -87,9 +87,13 @@ async function run() {
     });
 
     app.post("/classes", async (req, res) => {
-      const item = req.body;
-      const result = await classesCollection.insertOne(item);
-      res.send(result); //need to de something
+      const email = req.params.email;
+      const query = {email: email}
+      if(!email){
+        res.send([])
+      }
+      const result = await classesCollection.insertOne(query);
+      res.send(result);
     });
 
     // instructors related api
