@@ -48,11 +48,41 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    app.patch("/users/instructor/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "instructor",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     // classes related api
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find().toArray();
       result.sort((a, b) => b.num_students - a.num_students); // Sort by number of students in descending order
       res.send(result);
+    });
+
+    app.post("/classes", async (req, res) => {
+      const item = req.body;
+      const result = await classesCollection.insertOne(item);
+      res.send(result); //need to de something
     });
 
     // instructors related api
