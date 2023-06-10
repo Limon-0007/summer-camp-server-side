@@ -72,6 +72,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users/:email",async (req, res) => {
+      const email = req.params.email
+      const query = {email: email}
+      const result = await usersCollection.find(query).toArray()
+      res.send(result)
+    })
+
     // classes related api
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find().toArray();
