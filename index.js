@@ -122,8 +122,14 @@ async function run() {
     });
 
     // classes related api
-    app.get("/classes", async (req, res) => {
+    app.get("/classes", verifyJwt, verifyAdmin, async (req, res) => {
       const result = await classesCollection.find().toArray();
+      result.sort((a, b) => b.num_students - a.num_students); // Sort by number of students in descending order
+      res.send(result);
+    });
+
+    app.get("/classes/approved", async (req, res) => {
+      const result = await classesCollection.find({status: "approved"}).toArray();
       result.sort((a, b) => b.num_students - a.num_students); // Sort by number of students in descending order
       res.send(result);
     });
@@ -134,7 +140,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/classes/:email", async (req, res) => {
+    app.get("/classes/:email", verifyJwt, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await classesCollection.find(query).toArray();
@@ -166,7 +172,7 @@ async function run() {
       res.send(result);
     });
 
-    
+
     // instructors related api
     app.get("/instructors", async (req, res) => {
       const result = await instructorsCollection.find().toArray();
