@@ -45,12 +45,24 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const usersCollection = client.db("summerCampDB").collection("users");
     const classesCollection = client.db("summerCampDB").collection("classes");
     const instructorsCollection = client
       .db("summerCampDB")
       .collection("instructors");
+
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "admin") {
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden message" });
+      }
+      next();
+    };
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -73,7 +85,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users", verifyJwt, async (req, res) => {
+    app.get("/users", verifyJwt, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
@@ -122,6 +134,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/classes/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await classesCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // instructors related api
     app.get("/instructors", async (req, res) => {
@@ -130,7 +148,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/instructors/:id", verifyJwt, async (req, res) => {
+    app.get("/instructors/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await instructorsCollection.findOne(query);
