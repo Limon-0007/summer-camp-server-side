@@ -141,6 +141,32 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/classes/approved/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+
+    app.patch("/classes/declined/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          status: "declined",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    
     // instructors related api
     app.get("/instructors", async (req, res) => {
       const result = await instructorsCollection.find().toArray();
