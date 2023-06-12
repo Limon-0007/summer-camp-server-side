@@ -6,7 +6,21 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
+
+// const corsOptions = {
+//   origin: "*",
+//   credentials: true,
+//   optionSuccessStatus: 200,
+// };
+// app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: "GET,POST, PATCH, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "*",
+  })
+);
 app.use(express.json());
 
 const verifyJwt = (req, res, next) => {
@@ -48,6 +62,7 @@ async function run() {
     // await client.connect();
     const usersCollection = client.db("summerCampDB").collection("users");
     const classesCollection = client.db("summerCampDB").collection("classes");
+    const cartCollection = client.db("summerCampDB").collection("cart");
     const instructorsCollection = client
       .db("summerCampDB")
       .collection("instructors");
@@ -72,8 +87,24 @@ async function run() {
       res.send({ token });
     });
 
-    // users related api
+    // carts related api
+    app.post("/carts", async (req, res) => {
+      const newItem = req.body;
+      const result = await cartCollection.insertOne(newItem);
+      res.send(result);
+    });
 
+    app.get("/carts", verifyJwt, async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // users related api
     app.post("/users", async (req, res) => {
       const users = req.body;
       const query = { email: users?.email };
@@ -129,8 +160,10 @@ async function run() {
     });
 
     app.get("/classes/approved", async (req, res) => {
-      const result = await classesCollection.find({status: "approved"}).toArray();
-      result.sort((a, b) => b.num_students - a.num_students); // Sort by number of students in descending order
+      const result = await classesCollection
+        .find({ status: "approved" })
+        .toArray();
+      result.sort((a, b) => b.price - a.price); // Sort by number of students in descending order
       res.send(result);
     });
 
@@ -159,7 +192,6 @@ async function run() {
       res.send(result);
     });
 
-
     app.patch("/classes/declined/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -171,7 +203,6 @@ async function run() {
       const result = await classesCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
-
 
     // instructors related api
     app.get("/instructors", async (req, res) => {
