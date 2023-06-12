@@ -15,7 +15,7 @@ const port = process.env.PORT || 5000;
 // app.use(cors(corsOptions));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: "GET,POST, PATCH, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "*",
@@ -90,7 +90,7 @@ async function run() {
     // carts related api
     app.post("/carts", async (req, res) => {
       const newItem = req.body;
-      const result = await cartCollection.insertOne(newItem);
+      const result = await cartCollection.insertOne(newItem);;
       res.send(result);
     });
 
@@ -103,6 +103,13 @@ async function run() {
       const result = await cartCollection.find(query).toArray();
       res.send(result);
     });
+
+    app.delete("/carts/:id", async(req, res) => {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await cartCollection.deleteOne(query)
+      res.send(result)
+    })
 
     // users related api
     app.post("/users", async (req, res) => {
